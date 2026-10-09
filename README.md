@@ -13,7 +13,7 @@ By leveraging **Wazuh** as the core SIEM/XDR engine and **Shuffle** for orchestr
 ## 📑 Table of Contents
 1. [System Architecture](#system-architecture)
 2. [Component Breakdown](#component-breakdown)
-    - [DMZ & Network Security](#1-dmz--network-security)
+    - [DMZ](#1-dmz--network-security)
     - [Endpoint Security (EP Agents)](#2-endpoint-security-ep-agents)
     - [Core SIEM & Analysis](#3-core-siem--analysis)
     - [Orchestration & Intelligence](#4-orchestration--intelligence)
