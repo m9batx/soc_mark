@@ -1,6 +1,6 @@
 ### SOC M's Architecture - Integrated Security Operations Center Architecture system combined from set of open source tools
 
-<img width="1148" height="611" alt="Screenshot 2026-10-09 101742" src="https://github.com/user-attachments/assets/accf76a8-c15d-482c-b37c-8973e15cc643" />
+<img width="1148" height="611" alt="Screenshot 2026-10-09 101742" src="https://github.com/user-attachments/assets/98677527-26f7-4b7d-bd95-173895ca653b" />
 
 
 **SOC MARK** is a comprehensive, open-source-based Security Operations Center (SOC) architecture designed to centralize threat detection, log analysis, and incident response across hybrid environments. It integrates Endpoint Detection and Response (EDR), Network Detection, and File Integrity Monitoring (FIM) into a unified visibility plane.
