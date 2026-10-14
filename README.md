@@ -32,5 +32,9 @@ SOC Mark is divided into three primary functional zones to ensure defense-in-dep
 3.  **The Core (SOC Arch):** The central brain where logs are analyzed, threats are detected, and automated responses are triggered.
 
 ---
-
+The Perimeter (DMZ Arch)
+1. T-Pot 
+2. Safeline WAF 
+3. Proxmox Mail Gateway
+4. fail2fail 
 
