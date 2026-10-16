@@ -1,6 +1,7 @@
 ### SOC M's Architecture - Integrated Security Operations Center Architecture system combined from set of open source tools
 
-<img width="1272" height="582" alt="Screenshot 2026-10-09 144606" src="https://github.com/user-attachments/assets/6bdde73d-f1ae-4821-8cd5-cf1b228f17c5" />
+<img width="1130" height="575" alt="Screenshot 2026-10-16 211359" src="https://github.com/user-attachments/assets/a7611d4b-a8aa-47f7-9c04-721a3c875653" />
+
 
 
 
@@ -38,3 +39,10 @@ The Perimeter (DMZ Arch)
 3. Proxmox Mail Gateway
 4. fail2fail 
 
+
+
+
+resources 
+https://medium.com/@ludovic.doamba/wazuh-at-the-heart-of-a-sovereign-soc-architecture-for-public-and-critical-infrastructures-1d2808a0af61#1
+https://github.com/arviiyer/threat-intel-soc 
+https://github.com/Cyberfortress-Labs/Cyberfortress-Intelligent-SOC-Ecosystem
