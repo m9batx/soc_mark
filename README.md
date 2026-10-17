@@ -44,6 +44,7 @@ The Perimeter (DMZ Arch)
 
 
 resources 
-https://medium.com/@ludovic.doamba/wazuh-at-the-heart-of-a-sovereign-soc-architecture-for-public-and-critical-infrastructures-1d2808a0af61#1
-https://github.com/arviiyer/threat-intel-soc 
-https://github.com/Cyberfortress-Labs/Cyberfortress-Intelligent-SOC-Ecosystem
+1. https://medium.com/@ludovic.doamba/wazuh-at-the-heart-of-a-sovereign-soc-architecture-for-public-and-critical-infrastructures-1d2808a0af61#1
+2. https://github.com/arviiyer/threat-intel-soc
+3. https://github.com/Cyberfortress-Labs/Cyberfortress-Intelligent-SOC-Ecosystem
+
