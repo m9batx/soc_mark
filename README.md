@@ -35,7 +35,8 @@ SOC Mark is divided into three primary functional zones to ensure defense-in-dep
 ---
 The Perimeter (DMZ Arch)
 1. T-Pot 
-2. Safeline WAF 
+2. Safeline WAF -  (Web Application Firewall) is primarily used as an open-source, self-hosted security shield that sits in front of web applications, web servers, and homelabs. Operating as a reverse proxy, its main purpose is to monitor, filter, and block malicious incoming HTTP/HTTPS traffic before it can exploit vulnerabilities on your backend servers
+
 3. Proxmox Mail Gateway
 4. fail2fail 
 
