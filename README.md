@@ -12,14 +12,15 @@
 
 By leveraging **Wazuh** as the core SIEM/XDR engine and **Shuffle** for orchestration, SOC Mark automates the correlation of security events and enriches them with global threat intelligence.
 
----
-## 📑 Table of Contents
+## Table of Contents
+
 1. [System Architecture](#system-architecture)
 2. [Component Breakdown](#component-breakdown)
-    - [DMZ](#1-dmz--network-security)
-    - [Endpoint Security (EP Agents)](#2-endpoint-security-ep-agents)
-    - [Core SIEM & Analysis](#3-core-siem--analysis)
-    - [Orchestration & Intelligence](#4-orchestration--intelligence)
+   - [1. DMZ – Network Security](#1-dmz--network-security)
+   - [2. Endpoint Security (EP Agents)](#2-endpoint-security-ep-agents)
+   - [3. Core SIEM & Analysis](#3-core-siem--analysis)
+   - [4. Orchestration & Intelligence](#4-orchestration--intelligence)
+   - [5. ISMS / Governance Layer](#5-isms--governance-layer)
 3. [Data Flow](#data-flow)
 4. [Key Features](#key-features)
 5. [ISO 27001 Alignment](#iso-27001-alignment)
@@ -27,198 +28,182 @@ By leveraging **Wazuh** as the core SIEM/XDR engine and **Shuffle** for orchestr
 
 ---
 
-## 🏗 System Architecture
+## System Architecture
 
-SOC Mark is divided into three primary functional zones to ensure defense-in-depth:
+SOC MARK is divided into four primary functional zones to ensure defense-in-depth and full ISO 27001 coverage:
 
-1. **The Perimeter (DMZ Arch):** Handles ingress traffic, email security, and public-facing service protection.
-2. **The Endpoint (EP Agents):** Monitors internal workstations and servers for malicious activity.
-3. **The Core (SOC Arch):** The central brain where logs are analyzed, threats are detected, and automated responses are triggered.
+1. **The Perimeter (DMZ Arch)** – Handles ingress traffic, email security, and public-facing service protection.
+2. **The Endpoint (EP Agents)** – Monitors internal workstations and servers for malicious activity.
+3. **The Core (SOC Arch)** – Central detection, correlation, enrichment, orchestration, and incident response.
+4. **ISMS / Governance Layer** – Formal Information Security Management System (policies, Statement of Applicability, risk register, assets, training, and audit evidence).
 
 ---
 
-## 📦 Component Breakdown
+## Component Breakdown
 
 ### 1. DMZ – Network Security
 
-The DMZ layer provides an additional security boundary between the public Internet and the internal LAN. Public-facing services, such as web applications and email infrastructure, are placed in this segment so that potential compromises are contained before they can reach internal systems or endpoints.
+The DMZ provides an additional security boundary between the public Internet and the internal network. Public-facing services are placed here so that potential compromises are contained before they can reach internal systems.
 
-| # | Component | Role |
-|---|-----------|------|
-| 1 | **T-Pot** | All-in-one open-source honeypot platform supporting 20+ low- and high-interaction honeypots. Used to detect, attract, and analyze malicious activity targeting exposed services. [GitHub](https://github.com/telekom-security/tpotce) |
-| 2 | **SafeLine WAF** | Self-hosted, open-source Web Application Firewall that operates as a reverse proxy. Monitors, filters, and blocks malicious HTTP/HTTPS traffic (SQLi, XSS, exploit attempts, etc.). [GitHub](https://github.com/chaitin/safeline) |
-| 3 | **Proxmox Mail Gateway** | Open-source email security gateway and mail proxy. Filters both inbound and outbound email traffic, inspecting and sanitizing messages before they reach internal users. [Official site](https://www.proxmox.com/en/products/proxmox-mail-gateway/overview) |
-| 4 | **Fail2ban** | Open-source intrusion-prevention tool that monitors server logs and automatically bans IPs after suspicious behavior (repeated failed logins, exploit scanning, etc.). [GitHub](https://github.com/fail2ban/fail2ban) |
+| #  | Component                | Role |
+|----|--------------------------|------|
+| 1  | **T-Pot**                | All-in-one open-source honeypot platform supporting 20+ low- and high-interaction honeypots. Used to detect, attract, and analyze malicious activity targeting exposed services. [GitHub](https://github.com/telekom-security/tpotce) |
+| 2  | **SafeLine WAF**         | Self-hosted open-source Web Application Firewall operating as a reverse proxy. Filters and blocks malicious HTTP/HTTPS traffic (SQLi, XSS, exploit attempts, etc.). [GitHub](https://github.com/chaitin/safeline) |
+| 3  | **Proxmox Mail Gateway** | Open-source email security gateway that filters inbound and outbound email traffic before messages reach internal users. [Official site](https://www.proxmox.com/en/products/proxmox-mail-gateway/overview) |
+| 4  | **Fail2ban**             | Open-source intrusion-prevention tool that monitors logs and automatically bans IP addresses after suspicious behavior (failed logins, scanning, etc.). [GitHub](https://github.com/fail2ban/fail2ban) |
 
-**Security Role of the DMZ**  
-If a public website is hosted in this environment, SafeLine WAF and Fail2ban act as the primary protective layer against web-based attacks. SafeLine inspects and filters incoming HTTP/HTTPS requests, while Fail2ban detects abusive behavior and automatically blocks offending source IP addresses.
-
-For email services, Proxmox Mail Gateway is deployed in the DMZ to filter, inspect, and validate incoming and outgoing email traffic. This ensures that potentially malicious messages, attachments, or links are identified and mitigated within the DMZ before they reach a user’s mailbox on an internal endpoint. As a result, an exploit delivered through email is contained at the perimeter rather than being exposed directly to the LAN environment.
-
-This design follows a defense-in-depth approach: public-facing attack surfaces are isolated in the DMZ, malicious traffic is filtered before reaching internal resources, and any compromise is less likely to propagate into the internal network. T-Pot provides a multi-honeypot platform for observing attacker behavior and generating high-fidelity threat intelligence.
+**Security role of the DMZ**  
+SafeLine WAF and Fail2ban protect web applications. Proxmox Mail Gateway sanitizes email. T-Pot captures attacker behavior and generates high-fidelity threat intelligence. This design isolates public attack surfaces and reduces the chance of lateral movement into the internal network.
 
 ---
 
 ### 2. Endpoint Security (EP Agents)
 
-Endpoint agents provide deep visibility into workstations, servers, and other assets inside the trusted network. They collect telemetry, enforce detection rules, and feed the core SOC platform.
+| #  | Component               | Role |
+|----|-------------------------|------|
+| 5  | **Velociraptor Agent**  | Lightweight DFIR agent for on-demand and continuous forensic collections, hunting, and live response. Streams artifacts to the Velociraptor server. |
+| 6  | **Wazuh Agent**         | Multi-platform agent providing log collection, File Integrity Monitoring (FIM), rootkit detection, vulnerability assessment, and active response. |
 
-| # | Component | Role |
-|---|-----------|------|
-| 5 | **Velociraptor Agent** | Lightweight endpoint agent that performs digital forensics and incident response (DFIR) collections, hunting, and live response. Collects artifacts on demand or continuously and streams them to the Velociraptor server. |
-| 6 | **Wazuh Agent** | Multi-platform agent that performs log collection, File Integrity Monitoring (FIM), rootkit detection, vulnerability assessment, and active response. Sends events to the Wazuh manager. |
-
-**Key capabilities at the endpoint layer**
-- Continuous monitoring of system logs, processes, network connections, and file changes.
-- On-demand forensic collections via Velociraptor (memory, registry, files, etc.).
-- Local active response (e.g., blocking an IP or killing a process) coordinated by Wazuh.
-- Minimal performance impact while providing high-fidelity telemetry to the SOC core.
+**Key capabilities**
+- Continuous monitoring of logs, processes, network connections, and file changes
+- On-demand forensic collections (memory, disk, registry, etc.)
+- Local active response coordinated by Wazuh
+- High-fidelity telemetry with minimal performance impact
 
 ---
 
 ### 3. Core SIEM & Analysis
 
-This is the central processing and storage layer of SOC Mark.
-
-| # | Component | Role |
-|---|-----------|------|
-| 7 | **Velociraptor Server** | Central management and collection server for all Velociraptor agents. Stores collected artifacts, runs hunts, and provides a powerful query language (VQL) for investigations. |
-| 8 | **Wazuh Server Side** | Full Wazuh stack: **Manager** (rule engine & active response), **Indexer** (OpenSearch-based storage), and **Dashboard** (visualization & alerting). Acts as the primary SIEM/XDR platform. |
-| 9 | **RedGray** | Event enrichment / correlation engine that sits between Wazuh and the orchestration layer. Receives processed alerts and prepares them for automated workflows. |
-
-Wazuh receives agent data, applies detection rules, correlates events, and generates alerts. Velociraptor complements this with deep forensic capabilities that can be triggered on demand or via automation.
+| #  | Component                | Role |
+|----|--------------------------|------|
+| 7  | **Velociraptor Server**  | Central management and collection server. Stores artifacts, runs hunts, and provides a powerful query language (VQL). |
+| 8  | **Wazuh Server Side**    | Full stack: Manager (rule engine & active response), Indexer (OpenSearch), and Dashboard. Primary SIEM/XDR platform. |
+| 9  | **RedGray**              | Event enrichment and correlation engine sitting between Wazuh and the orchestration layer. |
 
 ---
 
 ### 4. Orchestration & Intelligence
 
-This layer turns detections into actionable, enriched, and automated responses.
+| #  | Component     | Role |
+|----|---------------|------|
+| 10 | **Shuffle**   | Open-source SOAR platform. Receives alerts and executes playbooks (enrichment, containment, notification, case creation). |
+| 11 | **Intel Owl** | Threat intelligence aggregation platform. Queries VirusTotal, GreyNoise, AbuseIPDB, MISP, OpenCTI, and other sources. |
+| 12 | **IRIS**      | Incident Response platform for case management, timelines, and evidence storage. |
+| 13 | **n8n**       | Workflow automation engine used for lighter or custom integrations (especially notifications). |
+| 14 | **Mail**      | Final notification channel for the SOC team. |
+| 15 | **Probo**     | Complementary continuous testing / vulnerability component. |
 
-| # | Component | Role |
-|---|-----------|------|
-| 10 | **Shuffle** | Open-source Security Orchestration, Automation and Response (SOAR) platform. Receives alerts from Wazuh/RedGray and executes playbooks (enrichment, containment, notification, ticket creation). |
-| 11 | **Intel Owl** | Threat intelligence aggregation platform. Queries multiple external and internal sources (VirusTotal, GreyNoise, AbuseIPDB, MISP, OpenCTI, etc.) and returns structured enrichment data to Shuffle. |
-| 12 | **IRIS** | Incident Response platform. Receives cases from Shuffle, tracks investigations, maintains timelines, and stores evidence. |
-| 13 | **n8n** | Workflow automation engine used for lighter or custom integrations (especially outbound notifications). |
-| 14 | **Mail** | Final notification channel. Alerts and reports are delivered to the SOC team via email. |
-| 15 | **Probo** | Complementary security tooling (vulnerability / continuous testing component) integrated into the SOC visibility plane. |
-| 16 | **MONARC** | Open-source risk assessment and risk management platform (based on ISO/IEC 27005). Used to perform structured information security risk analyses, maintain reusable risk models, and support ISO 27001 compliance activities. [Official site](https://www.monarc.lu) |
-
-**Threat Intelligence Connectors** (queried primarily via Intel Owl / Shuffle):
-- VirusTotal  
-- GreyNoise  
-- AbuseIPDB  
-- MISP  
-- OpenCTI  
+**Threat Intelligence Connectors** (via Intel Owl / Shuffle):
+- VirusTotal
+- GreyNoise
+- AbuseIPDB
+- MISP
+- OpenCTI
 
 ---
 
-## 🔄 Data Flow
+### 5. ISMS / Governance Layer
+
+This layer sits **outside** the operational SOC and provides the formal Information Security Management System required by ISO 27001.
+
+| Component          | Role |
+|--------------------|------|
+| **ISMS Builder**   | Self-hosted ISMS platform covering Policy management, Statement of Applicability (SoA), Risk Register, Security Goals, Asset inventory, BCM, GDPR, Training, Legal, Audit Findings, and reports. Supports ISO 27001:2022, NIS2, GDPR, and BSI IT-Grundschutz. [Official repository](https://github.com/coolstartnow/isms-builder) |
+| **MONARC**         | Open-source risk assessment platform based on ISO/IEC 27005. Used for detailed structured risk analyses that feed into the ISMS Builder risk register. [Official site](https://www.monarc.lu) |
+
+> **Important notes**
+> - ISMS Builder is under active development and maintained primarily by one person. Core modules are functional, but it is not yet a fully finished enterprise product.
+> - It does **not** automatically ingest live alerts or telemetry from Wazuh, Shuffle, IRIS, or other SOC tools. Data can be entered manually, imported via JSON, or pushed through its REST API (custom integration required).
+> - Always use only the official repository: https://github.com/coolstartnow/isms-builder  
+>   Fake repositories distributing malware have been reported.
+
+---
+
+## Data Flow
 
 1. **Ingress / Perimeter**  
-   Internet traffic → Firewall → DMZ (T-Pot, SafeLine WAF, Proxmox Mail Gateway, Fail2ban).  
-   Malicious activity is either blocked, logged, or captured by honeypots.
+   Internet traffic → Firewall → DMZ (T-Pot, SafeLine WAF, Proxmox Mail Gateway, Fail2ban). Malicious activity is blocked, logged, or captured by honeypots.
 
 2. **Endpoint Telemetry**  
-   Velociraptor agents (5) and Wazuh agents (6) continuously collect data from endpoints and forward it to their respective servers (7 & 8).
+   Velociraptor agents and Wazuh agents collect data and forward it to their respective servers.
 
 3. **Central Detection**  
-   Wazuh Manager processes logs, applies rules, and generates alerts.  
-   RedGray (9) receives and prepares these alerts for orchestration.
+   Wazuh Manager processes logs, applies rules, and generates alerts. RedGray prepares events for orchestration.
 
 4. **Orchestration & Enrichment**  
-   Alerts flow into **Shuffle** (10).  
-   Shuffle triggers playbooks that:
-   - Query **Intel Owl** (11) for threat intelligence enrichment.
-   - Create or update cases in **IRIS** (12).
-   - Optionally use **n8n** (13) for additional automation.
+   Alerts flow into Shuffle. Playbooks query Intel Owl for threat intelligence, create/update cases in IRIS, and optionally trigger n8n workflows.
 
 5. **Notification & Response**  
-   Enriched alerts and case updates are sent via n8n → Mail (14).  
-   Analysts work the cases in IRIS while Shuffle can also perform automated containment actions (via Wazuh active response or Velociraptor).
+   Enriched alerts and case updates are sent via n8n → Mail. Analysts work cases in IRIS. Automated containment can be performed via Wazuh Active Response or Velociraptor.
 
-6. **Supporting Visibility & Risk Management**  
-   Probo (15) provides continuous testing / vulnerability-related feeds.  
-   **MONARC** (16) is used for formal information security risk assessments and risk treatment tracking, feeding risk context into the overall SOC and ISMS processes.
+6. **Supporting Visibility**  
+   Probo provides continuous testing and vulnerability feeds.
+
+7. **ISMS / Governance**  
+   High-level findings, residual risks, and control effectiveness data can be transferred manually or via custom API into ISMS Builder. Detailed risk analyses from MONARC are imported into the ISMS Builder risk register.
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- **Defense-in-depth**: Clear separation between DMZ, endpoints, and SOC core.
-- **Open-source first**: Almost the entire stack is FOSS and can be fully self-hosted.
-- **Automated enrichment**: Every alert is automatically enriched with multiple threat-intel sources via Intel Owl + Shuffle.
-- **Dual endpoint coverage**: Wazuh for continuous SIEM/XDR + Velociraptor for deep DFIR and hunting.
-- **Flexible orchestration**: Shuffle playbooks + n8n for custom workflows.
-- **Incident lifecycle management**: Full case management with IRIS.
-- **Email & perimeter protection**: Proxmox Mail Gateway + SafeLine WAF + Fail2ban + T-Pot.
-- **Risk Assessment Integration**: MONARC enables structured, ISO 27005-aligned risk analyses that complement the operational detection and response capabilities of the SOC.
+- Defense-in-depth with clear separation of DMZ, endpoints, SOC core, and ISMS governance
+- Fully open-source and self-hostable stack
+- Automated alert enrichment with multiple threat intelligence sources
+- Dual endpoint coverage (Wazuh continuous monitoring + Velociraptor deep DFIR)
+- Flexible orchestration (Shuffle + n8n)
+- Complete incident lifecycle management with IRIS
+- Strong perimeter protection (WAF, mail gateway, honeypots, Fail2ban)
+- Formal ISMS capabilities (policies, SoA, risk register, assets, training, audit evidence) via ISMS Builder + MONARC
 
 ---
 
 ## ISO 27001 Alignment
 
-SOC Mark is designed to support an Information Security Management System (ISMS) in accordance with **ISO/IEC 27001:2022**. The architecture directly contributes to multiple Annex A controls by providing continuous monitoring, detection, enrichment, incident handling, and automated response capabilities.
+SOC MARK supports an Information Security Management System in accordance with **ISO/IEC 27001:2022**.
 
-### 1. Organizational Controls
+### Organizational Controls
 
-| Control | Title | How SOC Mark Supports It |
+| Control | Title | How SOC MARK supports it |
 |---------|-------|--------------------------|
-| **5.7** | Threat intelligence | Intel Owl + Shuffle continuously query multiple threat intelligence sources (VirusTotal, GreyNoise, AbuseIPDB, MISP, OpenCTI). Alerts are automatically enriched with external and internal TI. |
-| **5.24** | Information security incident management planning and preparation | IRIS provides structured case management, playbooks, timelines, and evidence storage. Shuffle playbooks formalize response procedures. |
-| **5.25** | Assessment and decision on information security events | Wazuh rules + RedGray + Shuffle evaluate events, apply enrichment, and decide whether an event becomes an incident. |
-| **5.26** | Response to information security incidents | Automated containment via Wazuh Active Response and Velociraptor, case creation in IRIS, and notification via n8n/mail. |
-| **5.27** | Learning from information security incidents | IRIS retains full case history, timelines, and artifacts, enabling post-incident reviews and continuous improvement. |
-| **5.28** | Collection of evidence | Velociraptor performs forensic collections (memory, disk, registry, etc.). IRIS stores and tracks evidence. |
+| 5.7     | Threat intelligence | Intel Owl + Shuffle continuously enrich alerts with multiple TI sources |
+| 5.24    | Incident management planning | IRIS + Shuffle playbooks |
+| 5.25    | Assessment of security events | Wazuh rules + RedGray + Shuffle |
+| 5.26    | Response to incidents | Automated containment + IRIS case management |
+| 5.27    | Learning from incidents | Full case history and timelines in IRIS |
+| 5.28    | Collection of evidence | Velociraptor forensic collections + IRIS evidence storage |
 
-### 2. Technological Controls
+### Technological Controls
 
-| Control | Title | How SOC Mark Supports It |
+| Control | Title | How SOC MARK supports it |
 |---------|-------|--------------------------|
-| **8.7** | Protection against malware | Wazuh agents provide malware detection, rootkit detection, and FIM. T-Pot captures malware samples. SafeLine WAF and Proxmox Mail Gateway block delivery vectors. |
-| **8.8** | Management of technical vulnerabilities | Wazuh vulnerability detection module + Probo feed vulnerability data into the same visibility and alerting pipeline. |
-| **8.15** | Logging | Wazuh agents collect comprehensive system, application, and security logs. All events are centralized in the Wazuh Indexer. |
-| **8.16** | Monitoring activities | Continuous monitoring is performed by Wazuh (SIEM/XDR), Velociraptor (endpoint telemetry), SafeLine WAF, Fail2ban, and T-Pot. Shuffle orchestrates monitoring outcomes. |
-| **8.20** | Networks security | Network segmentation (DMZ vs internal), SafeLine WAF, Fail2ban, and Proxmox Mail Gateway protect network boundaries and services. |
-| **8.21** | Security of network services | SafeLine (reverse proxy/WAF) and Proxmox Mail Gateway secure public-facing services. |
-| **8.22** | Segregation of networks | Explicit DMZ architecture isolates public-facing systems (T-Pot, SafeLine, Proxmox Mail Gateway, Fail2ban) from the internal network and SOC core. |
-| **8.23** | Web filtering | SafeLine WAF acts as a protective reverse proxy filtering malicious HTTP/HTTPS traffic. |
+| 8.7     | Protection against malware | Wazuh agents, T-Pot, SafeLine WAF, Proxmox Mail Gateway |
+| 8.8     | Management of technical vulnerabilities | Wazuh vulnerability detection + Probo |
+| 8.15    | Logging | Comprehensive log collection via Wazuh agents |
+| 8.16    | Monitoring activities | Continuous monitoring by Wazuh, Velociraptor, SafeLine, Fail2ban, T-Pot |
+| 8.20–8.22 | Network security & segregation | Explicit DMZ architecture |
+| 8.23    | Web filtering | SafeLine WAF |
 
-### 3. Supporting Controls (Indirect but Strong Contribution)
+### Management System Support
 
-| Control | Title | Contribution |
-|---------|-------|--------------|
-| **5.1** | Policies for information security | SOC Mark operationalizes detection, response, and logging policies. |
-| **8.1** | User endpoint devices | Dual agent model (Wazuh + Velociraptor) provides visibility and control over endpoints. |
-| **8.2** | Privileged access rights | Active Response and forensic collections can be restricted and audited. |
-| **8.9** | Configuration management | File Integrity Monitoring (FIM) in Wazuh detects unauthorized configuration changes. |
-| **8.10** | Information deletion | Forensic and log retention policies can be enforced via Wazuh and IRIS. |
-| **8.12** | Data leakage prevention | Monitoring of unusual data transfers and process behavior via Wazuh and Velociraptor. |
+ISMS Builder + MONARC provide the formal management-system elements (Clauses 4–10): policies, Statement of Applicability, risk register, security objectives, asset management, training, governance, and audit evidence.
 
-### Summary of Alignment Strengths
-
-- **Continuous monitoring & logging** (8.15, 8.16) → Fully covered by Wazuh + Velociraptor + perimeter tools.
-- **Incident management lifecycle** (5.24–5.28) → Covered end-to-end by Shuffle + IRIS + n8n + automated response.
-- **Threat intelligence** (5.7) → Native integration via Intel Owl and external connectors.
-- **Network segregation & perimeter protection** (8.20–8.22) → Explicit DMZ design with WAF, mail gateway, honeypots, and Fail2ban.
-- **Malware & vulnerability protection** (8.7, 8.8) → Multiple overlapping controls (agents, WAF, honeypots, vulnerability scanning).
-- **Risk assessment** → MONARC provides structured, ISO 27005-aligned risk analysis supporting the overall ISMS.
-
-> **Note:** SOC Mark does **not** replace the need for formal ISMS documentation, risk assessment, policies, or management commitment required by ISO 27001. However, it provides a strong technical foundation that directly implements and evidences many of the key Annex A controls related to detection, monitoring, and incident response.
+> **Note**  
+> SOC MARK provides a strong technical and governance foundation. Formal risk assessment, documented policies, management commitment, and internal audits are still required for ISO 27001 certification.
 
 ---
 
-## 🚀 Deployment Guide (High-level)
+## Deployment Guide (High-level)
 
-1. Deploy the DMZ components (T-Pot, SafeLine, Proxmox Mail Gateway, Fail2ban) on dedicated hosts/VMs isolated from the internal network.
+1. Deploy DMZ components (T-Pot, SafeLine, Proxmox Mail Gateway, Fail2ban) on isolated hosts/VMs.
 2. Deploy Wazuh Manager + Indexer + Dashboard and Velociraptor Server in the SOC zone.
 3. Roll out Wazuh and Velociraptor agents to all endpoints.
 4. Deploy Shuffle, Intel Owl, IRIS, and n8n.
-5. Configure the connectors (VirusTotal, GreyNoise, AbuseIPDB, MISP, OpenCTI) inside Intel Owl / Shuffle.
-6. Build and test the core playbooks in Shuffle (alert → enrich → case creation → notification).
-7. Deploy **MONARC** for formal risk assessment and risk treatment tracking (strongly recommended for ISO 27001 alignment).
-8. Integrate Probo feeds into the same pipeline.
-
+5. Configure threat intelligence connectors inside Intel Owl / Shuffle.
+6. Build and test core Shuffle playbooks (alert → enrich → case → notify).
+7. Deploy MONARC for detailed ISO 27005 risk analyses.
+8. Deploy ISMS Builder (official repository only) as the central ISMS platform.
+9. Optionally create custom integrations (API or n8n/Shuffle) to push high-level findings into ISMS Builder.
+10. Integrate Probo feeds into the pipeline.
 
 
 resources 
