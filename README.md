@@ -1,6 +1,7 @@
 ### SOC M's Architecture - Integrated Security Operations Center Architecture system combined from set of open source tools
 
-<img width="1102" height="537" alt="Screenshot 2026-10-18 185303" src="https://github.com/user-attachments/assets/1ec7206e-56e4-4a2d-8be5-aacc806201eb" />
+<img width="1091" height="524" alt="Screenshot 2026-10-18 190600" src="https://github.com/user-attachments/assets/addf64f8-afc8-428b-849d-4e111349776c" />
+
 
 
 
