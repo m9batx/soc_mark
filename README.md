@@ -1,6 +1,8 @@
 ### SOC M's Architecture - Integrated Security Operations Center Architecture system combined from set of open source tools
 
-<img width="1130" height="575" alt="Screenshot 2026-10-16 211359" src="https://github.com/user-attachments/assets/a7611d4b-a8aa-47f7-9c04-721a3c875653" />
+<img width="1102" height="537" alt="Screenshot 2026-10-18 185303" src="https://github.com/user-attachments/assets/1ec7206e-56e4-4a2d-8be5-aacc806201eb" />
+
+
 
 
 
@@ -33,15 +35,31 @@ SOC Mark is divided into three primary functional zones to ensure defense-in-dep
 3.  **The Core (SOC Arch):** The central brain where logs are analyzed, threats are detected, and automated responses are triggered.
 
 ---
-The Perimeter (DMZ Arch)
-1. T-Pot 
-2. Safeline WAF -  (Web Application Firewall) is primarily used as an open-source, self-hosted security shield that sits in front of web applications, web servers, and homelabs. Operating as a reverse proxy, its main purpose is to monitor, filter, and block malicious incoming HTTP/HTTPS traffic before it can exploit vulnerabilities on your backend servers
+**The Perimeter (DMZ Arch):** 
 
-3. Proxmox Mail Gateway
-4. fail2fail 
+The DMZ layer provides an additional security boundary between the public Internet and the internal LAN. Public-facing services, such as web applications and email infrastructure, are placed in this segment so that potential compromises are contained before they can reach internal systems or endpoints
+ 
+1. T-Pot - an all-in-one open-source honeypot platform, supports 20+ low- and high-interaction honeypots, It is used to detect, attract, and analyze malicious activity targeting exposed services. 
+https://github.com/telekom-security/tpotce
+
+2. Safeline WAF -  A self-hosted, open-source Web Application Firewall that operates as a reverse proxy in front of web applications and web servers. It monitors, filters, and blocks malicious HTTP/HTTPS traffic, protecting backend services from common web attacks such as SQL injection, XSS, and exploit attempts before they reach the application.
+https://github.com/chaitin/safeline
+
+3. Proxmox Mail Gateway - An open-source email security gateway and mail proxy that filters both inbound and outbound email traffic. It is deployed in the DMZ to inspect and sanitize messages before they are delivered to internal mail users.
+https://www.proxmox.com/en/products/proxmox-mail-gateway/overview
+
+4. fail2Ban - an open-source intrusion-prevention tool that watches server logs and automatically bans IPs after suspicious behavior, such as repeated failed logins or exploit scanning
+https://github.com/fail2ban/fail2ban
+
+Security Role of the DMZ
+If a public website is hosted in this environment, SafeLine WAF and Fail2ban act as the primary protective layer against web-based attacks. SafeLine inspects and filters incoming HTTP/HTTPS requests, while Fail2ban detects abusive behavior and automatically blocks offending source IP addresses.
+For email services, Proxmox Mail Gateway is deployed in the DMZ to filter, inspect, and validate incoming and outgoing email traffic. This ensures that potentially malicious messages, attachments, or links are identified and mitigated within the DMZ before they reach a user’s mailbox on an internal endpoint. As a result, an exploit delivered through email is contained at the perimeter rather than being exposed directly to the LAN environment.
+This design follows a defense-in-depth approach: public-facing attack surfaces are isolated in the DMZ, malicious traffic is filtered before reaching internal resources, and any compromise is less likely to propagate into the internal network. SafeLine is specifically designed as a self-hosted WAF and reverse proxy to protect web applications from attacks and exploits, while T-Pot provides a multi-honeypot platform for observing attacker behavior.
 
 
 
+
+  **The Endpoint (EP Agents):**
 
 resources 
 1. https://medium.com/@ludovic.doamba/wazuh-at-the-heart-of-a-sovereign-soc-architecture-for-public-and-critical-infrastructures-1d2808a0af61#1
