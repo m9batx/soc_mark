@@ -206,8 +206,9 @@ ISMS Builder + MONARC provide the formal management-system elements (Clauses 4â€
 9. Optionally create custom integrations (API or n8n/Shuffle) to push high-level findings into ISMS Builder.
 10. Integrate Probo feeds into the pipeline.
 
+---
 
-resources 
+## Resources 
 1. https://medium.com/@ludovic.doamba/wazuh-at-the-heart-of-a-sovereign-soc-architecture-for-public-and-critical-infrastructures-1d2808a0af61#1
 2. https://github.com/arviiyer/threat-intel-soc
 3. https://github.com/Cyberfortress-Labs/Cyberfortress-Intelligent-SOC-Ecosystem
